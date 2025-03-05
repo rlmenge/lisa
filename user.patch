@@ -1,0 +1,25 @@
+From 1d0dc81c8009186dc950c08cae0fcda76f204d77 Mon Sep 17 00:00:00 2001
+From: Rachel Menge <rachelmenge@microsoft.com>
+Date: Tue, 4 Mar 2025 18:37:40 +0000
+Subject: [PATCH] Make patch to add username into platform.py
+
+---
+ lisa/sut_orchestrator/azure/platform_.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lisa/sut_orchestrator/azure/platform_.py b/lisa/sut_orchestrator/azure/platform_.py
+index 0719a878..2687dbca 100644
+--- a/lisa/sut_orchestrator/azure/platform_.py
++++ b/lisa/sut_orchestrator/azure/platform_.py
+@@ -583,7 +583,7 @@ class AzurePlatform(Platform):
+                 f"{normalized_name}-e{environment.id}", 80
+             )
+             environment_context.resource_group_is_specified = True
+-
++        resource_group_name = f"rlmenge-{resource_group_name}"
+         environment_context.resource_group_name = resource_group_name
+ 
+         if self._azure_runbook.dry_run:
+-- 
+2.45.3
+
