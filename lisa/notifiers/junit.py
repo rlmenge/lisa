@@ -2,7 +2,8 @@
 # Licensed under the MIT license.
 
 import xml.etree.ElementTree as ET  # noqa: N817
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
+import dataclasses
 from pathlib import Path
 from typing import IO, Any, Dict, List, Optional, Type, cast
 
@@ -17,9 +18,26 @@ from lisa.messages import (
     TestRunMessage,
     TestRunStatus,
     TestStatus,
+    PerfMessage
 )
 from lisa.notifier import Notifier
 from lisa.util import LisaException, constants
+from lisa.util import fields_to_dict, plugin_manager
+
+def get_perfmessage_dataclasses():
+    subclasses = PerfMessage.__subclasses__()
+    dataclass_subclasses = [cls for cls in subclasses if dataclasses.is_dataclass(cls)]
+    return dataclass_subclasses
+
+def get_unique_perf_subclass_fields(subclass):
+    # get fields unique to subclass compared to perfmessage
+    # create a set of perfmessage fields
+    perfmessage_fields = set(fields(PerfMessage))
+    # create a set of subclass fields
+    subclass_fields = set(fields(subclass))
+    # get the difference
+    unique_fields = subclass_fields - perfmessage_fields
+    return unique_fields
 
 
 @dataclass_json()
@@ -100,7 +118,7 @@ class JUnit(Notifier):
 
     # The types of messages that this class supports.
     def _subscribed_message_type(self) -> List[Type[MessageBase]]:
-        subscribed_types = [TestResultMessage, TestRunMessage]
+        subscribed_types = [TestResultMessage, TestRunMessage, PerfMessage]
 
         runbook: JUnitSchema = cast(JUnitSchema, self.runbook)
         if runbook.include_subtest:
@@ -118,6 +136,9 @@ class JUnit(Notifier):
 
         elif isinstance(message, SubTestMessage):
             self._received_sub_test(message)
+
+        elif isinstance(message, PerfMessage):
+            self._received_perf(message)
 
     # Handle a test run message.
     def _received_test_run(self, message: TestRunMessage) -> None:
@@ -145,6 +166,19 @@ class JUnit(Notifier):
 
         elif message.is_completed:
             self._sub_test_case_completed(message)
+    
+    # Handle a perf message.
+    def _received_perf(self, message: PerfMessage) -> None:
+        # get the subclass of perfmessage
+        subclasses = get_perfmessage_dataclasses()
+        # get the test_result_id
+        test_result_id=message.test_result_id
+        subclass_fields = set(fields(message))
+        unique_fields = get_unique_perf_subclass_fields(message.subclass)
+        # cast fields to string
+        message_dict = {field.name: str(getattr(message, field.name)) for field in unique_fields}
+        
+        #self._add_perf_case_result(message, unique_fields)
 
     def _set_test_suite_info(self, message: TestResultMessage) -> None:
         # Check if the test suite for this test case has been seen yet.
