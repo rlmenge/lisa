@@ -12,10 +12,15 @@ variable:
     value: false
   - name: ignore_failure
     value: false
+  - name: category
+    value: ""
+  - name: case
+    value: ""
 testcase:
   - criteria:
-      name: $(case)
+      category: $(category)
     times: $(times)
     retry: $(retry)
     use_new_environment: $(use_new_environment)
     ignore_failure: $(ignore_failure)
+ 

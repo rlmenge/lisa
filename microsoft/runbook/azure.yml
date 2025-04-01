@@ -41,6 +41,8 @@ concurrency: $(concurrency)
 notifier:
   - type: html
   - type: env_stats
+  - type: junit
+  - type: text_result
 platform:
   - type: azure
     admin_private_key_file: $(admin_private_key_file)

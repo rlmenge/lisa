@@ -581,6 +581,7 @@ class AzurePlatform(Platform):
             )
             environment_context.resource_group_is_specified = True
 
+        resource_group_name = f"rachelmenge-{resource_group_name}"
         environment_context.resource_group_name = resource_group_name
 
         if self._azure_runbook.dry_run:
