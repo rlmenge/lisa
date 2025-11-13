@@ -66,7 +66,14 @@ __url_pattern = re.compile(
 # Example:
 # Text: "\x1b[?1h\x1b=\rAdd linux-next specific files for 20230221\x1b[m\r\n\r\x1b[K\x1b[?1l\x1b>"  # noqa: E501
 # Escape Result: '\rAdd linux-next specific files for 20230221\r\n\r'
-__ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_=<>a-kzNM78]|\[[0-?]*[ -/]*[@-~])")
+# Also filters OSC (Operating System Command) sequences like audit logs from Fedora 43:
+# "\x1b]3008;start=xxx;user=xxx;...\x1b\" (sudo audit logging via ANSI escape)
+# OSC format: ESC ] <data> BEL or ESC ] <data> ESC \
+# Note: OSC pattern must come first to prevent the ] character from being matched
+# by the single-character escape range \\-_ which includes ] (0x5c-0x5f contains 0x5d)
+__ansi_escape = re.compile(
+    r"\x1B(?:\](?:[^\x07\x1B]|\x1B(?!\\))*(?:\x07|\x1B\\)|[@-Z\\-_=<>a-kzNM78]|\[[0-?]*[ -/]*[@-~])"
+)
 
 # 10.0.22000.100
 # 18.04.5
