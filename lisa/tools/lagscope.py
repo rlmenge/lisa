@@ -13,7 +13,7 @@ from lisa.messages import (
     create_perf_message,
     send_unified_perf_message,
 )
-from lisa.operating_system import CBLMariner, Debian, Posix, Redhat, Suse
+from lisa.operating_system import CBLMariner, Debian, Fedora, Posix, Redhat, Suse
 from lisa.util import LisaException, constants, find_groups_in_lines, get_datetime_path
 from lisa.util.process import ExecutableResult, Process
 
@@ -456,6 +456,15 @@ class Lagscope(Tool, KillableMixin):
             package_list = [
                 "kernel-headers",
                 "binutils",
+                "glibc-devel",
+                "zlib-devel",
+                "cmake",
+            ]
+        elif isinstance(self.node.os, Fedora):
+            package_list = [
+                "kernel-headers",
+                "binutils",
+                "gcc",
                 "glibc-devel",
                 "zlib-devel",
                 "cmake",
