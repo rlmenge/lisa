@@ -4,7 +4,7 @@
 from typing import Any, List, Type, cast
 
 from lisa.executable import Tool
-from lisa.operating_system import BSD, CBLMariner, Debian, Posix, Redhat, Suse
+from lisa.operating_system import BSD, CBLMariner, Debian, Fedora, Posix, Redhat, Suse
 from lisa.util import LisaException
 from lisa.util.process import Process
 
@@ -75,6 +75,8 @@ class Netperf(Tool):
     def _install(self) -> bool:
         if not self._check_exists():
             if isinstance(self.node.os, BSD):
+                self.node.os.install_packages("netperf")
+            elif isinstance(self.node.os, Fedora):
                 self.node.os.install_packages("netperf")
             else:
                 self._install_from_src()
