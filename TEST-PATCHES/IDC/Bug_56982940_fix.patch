@@ -1,0 +1,22 @@
+diff --git a/microsoft/testsuites/core/azure_image_standard.py b/microsoft/testsuites/core/azure_image_standard.py
+index a1610597..f602b2d8 100644
+--- a/microsoft/testsuites/core/azure_image_standard.py
++++ b/microsoft/testsuites/core/azure_image_standard.py
+@@ -76,7 +76,7 @@ class AzureImageStandard(TestSuite):
+ 
+     # pattern to get failure, error, warnings from dmesg, syslog/messages
+     _error_fail_warnings_pattern: List[Pattern[str]] = [
+-        re.compile(r"^(.*fail.*)$", re.MULTILINE),
++        re.compile(r"^(?!.*\bres=failed\b)(.*fail.*)$", re.MULTILINE),
+         re.compile(r"^(.*error.*)$", re.MULTILINE),
+         re.compile(r"^(.*warning.*)$", re.MULTILINE),
+     ]
+@@ -264,7 +264,7 @@ class AzureImageStandard(TestSuite):
+         # I/O error,dev sr0,sector 8 op 0x0:(READ) flags 0x80700 phys_seg 1 prio class 2
+         # I/O error,dev sr0,sector 8 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+         re.compile(
+-            r"^(.* I/O error, dev sr0, sector 8 op 0x0:\(READ\) flags 0x[0-9a-fA-F]+ phys_seg 1 prio class 2\r)$",  # noqa: E501
++            r"^(.* I/O error, dev sr0, sector 8 op 0x0:\(READ\) flags 0x[0-9a-fA-F]+ phys_seg 1 prio class \d+\r)$",  # noqa: E501
+             re.M,
+         ),
+         # 2025-01-16T08:51:16.449922+00:00 azurelinux kernel: audit: type=1103

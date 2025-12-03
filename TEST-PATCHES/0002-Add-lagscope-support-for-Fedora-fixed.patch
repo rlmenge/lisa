@@ -1,0 +1,20 @@
+From 1d961e750943fede93675cbc900550a4d153fa7f Mon Sep 17 00:00:00 2001
+From: Rachel Menge <rachelmenge@microsoft.com>
+Date: Tue, 2 Dec 2025 17:04:45 -0800
+Subject: [PATCH] Add lagscope support for Fedora
+
+---
+ lisa/tools/lagscope.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lisa/tools/lagscope.py b/lisa/tools/lagscope.py
+index 28f4e781b..8d99d423a 100644
+--- a/lisa/tools/lagscope.py
++++ b/lisa/tools/lagscope.py
+@@ -10,7 +10,7 @@ from lisa.executable import Tool
+ from lisa.messages import NetworkLatencyPerformanceMessage, create_perf_message
+-from lisa.operating_system import CBLMariner, Debian, Posix, Redhat, Suse
++from lisa.operating_system import CBLMariner, Debian, Fedora, Posix, Redhat, Suse
+ from lisa.util import LisaException, constants, find_groups_in_lines, get_datetime_path
+ from lisa.util.process import ExecutableResult, Process
+ 

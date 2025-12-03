@@ -1,0 +1,34 @@
+From 4d525af610195b4934cf39f023a56d857284d6a4 Mon Sep 17 00:00:00 2001
+From: Rachel Menge <rachelmenge@microsoft.com>
+Date: Mon, 1 Dec 2025 13:46:54 -0800
+Subject: [PATCH] Remove new lines in kprobe output
+
+---
+ lisa/microsoft/testsuites/core/debug.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lisa/microsoft/testsuites/core/debug.py b/lisa/microsoft/testsuites/core/debug.py
+index 8a6dbb0b3..7c761f1ed 100644
+--- a/lisa/microsoft/testsuites/core/debug.py
++++ b/lisa/microsoft/testsuites/core/debug.py
+@@ -92,7 +92,7 @@ class KernelDebug(TestSuite):
+                     "/sys/kernel/debug/tracing/kprobe_events",
+                     sudo=True,
+                     force_run=True,
+-                )
++                ).strip()
+             ).described_as(
+                 "after echoing 'p:my filp_close' to "
+                 "/sys/kernel/debug/tracing/kprobe_events, "
+@@ -105,7 +105,7 @@ class KernelDebug(TestSuite):
+                     "/sys/kernel/debug/tracing/events/kprobes/my/enable",
+                     sudo=True,
+                     force_run=True,
+-                )
++                ).strip()
+             ).described_as(
+                 "after echoing '1' to "
+                 "/sys/kernel/debug/tracing/events/kprobes/my/enable, "
+-- 
+2.51.0
+

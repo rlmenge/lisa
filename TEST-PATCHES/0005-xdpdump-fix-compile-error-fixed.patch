@@ -1,0 +1,28 @@
+From b4c4430f4ae28172d8408588ed0522ad2dd7fa5f Mon Sep 17 00:00:00 2001
+From: Lili Deng <lildeng@microsoft.com>
+Date: Wed, 26 Nov 2025 12:14:46 +0800
+Subject: [PATCH] xdpdump: fix compile error
+
+---
+ microsoft/testsuites/xdp/xdpdump.py | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/microsoft/testsuites/xdp/xdpdump.py b/microsoft/testsuites/xdp/xdpdump.py
+index d89ed889c..58f1a1c4a 100644
+--- a/microsoft/testsuites/xdp/xdpdump.py
++++ b/microsoft/testsuites/xdp/xdpdump.py
+@@ -101,6 +101,14 @@ class XdpDump(Tool):
+             sudo=True,
+         )
+ 
++        # Fix Makefile compilation rule
++        sed.substitute(
++            "-O2 -emit-llvm -c -g \\$<",
++            "-O2 -emit-llvm -g $< -o ${<:.c=.ll}",
++            f"{self._code_path}/Makefile",
++            sudo=True,
++        )
++
+         # create a default version for exists checking.
+         make = self.node.tools[Make]
+         make.make(

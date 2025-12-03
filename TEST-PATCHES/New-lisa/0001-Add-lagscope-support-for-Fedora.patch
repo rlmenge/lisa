@@ -1,0 +1,41 @@
+From 1d961e750943fede93675cbc900550a4d153fa7f Mon Sep 17 00:00:00 2001
+From: Rachel Menge <rachelmenge@microsoft.com>
+Date: Tue, 2 Dec 2025 17:04:45 -0800
+Subject: [PATCH] Add lagscope support for Fedora
+
+---
+ lisa/tools/lagscope.py | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/lisa/tools/lagscope.py b/lisa/tools/lagscope.py
+index 28f4e781b..8d99d423a 100644
+--- a/lisa/tools/lagscope.py
++++ b/lisa/tools/lagscope.py
+@@ -13,7 +13,7 @@ from lisa.messages import (
+     create_perf_message,
+     send_unified_perf_message,
+ )
+-from lisa.operating_system import CBLMariner, Debian, Posix, Redhat, Suse
++from lisa.operating_system import CBLMariner, Debian, Fedora, Posix, Redhat, Suse
+ from lisa.util import LisaException, constants, find_groups_in_lines, get_datetime_path
+ from lisa.util.process import ExecutableResult, Process
+ 
+@@ -460,6 +460,15 @@ class Lagscope(Tool, KillableMixin):
+                 "zlib-devel",
+                 "cmake",
+             ]
++        elif isinstance(self.node.os, Fedora):
++            package_list = [
++                "kernel-headers",
++                "binutils",
++                "gcc",
++                "glibc-devel",
++                "zlib-devel",
++                "cmake",
++            ]
+         else:
+             raise LisaException(
+                 f"tool {self.command} can't be installed in distro {self.node.os.name}."
+-- 
+2.51.0
+

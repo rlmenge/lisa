@@ -1,0 +1,44 @@
+From d7046e92564b6dd3ed0f281104e735dc250d5c67 Mon Sep 17 00:00:00 2001
+From: Lili Deng <lildeng@microsoft.com>
+Date: Tue, 19 Aug 2025 16:54:07 +0800
+Subject: [PATCH] Add comment explaining kvp_client exit code 5
+
+---
+ lisa/sut_orchestrator/azure/tools.py | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/lisa/sut_orchestrator/azure/tools.py b/lisa/sut_orchestrator/azure/tools.py
+index 908ecee122..22ceb8d322 100644
+--- a/lisa/sut_orchestrator/azure/tools.py
++++ b/lisa/sut_orchestrator/azure/tools.py
+@@ -334,10 +334,16 @@ def can_install(self) -> bool:
+         return True
+ 
+     def get_pool_count(self) -> int:
+-        output = self.run(
+-            expected_exit_code=0,
+-            expected_exit_code_failure_message="failed to run kvp_client",
+-        ).stdout
++        result = self.run()
++        # kvp_client returns:
++        # 0 -> success, some records read
++        # 5 -> success, but no records available
++        if result.exit_code not in [0, 5]:
++            raise LisaException(
++                f"failed to run kvp_client, exit code: {result.exit_code}, "
++                f"output: {result.stdout}"
++            )
++        output = result.stdout
+         matched_lines = find_patterns_in_lines(output, [self._pool_pattern])
+         return len(matched_lines[0])
+ 
+@@ -347,7 +353,8 @@ def get_pool_records(self, pool_id: int, force_run: bool = False) -> Dict[str, s
+             force_run=force_run,
+         )
+         # some distro return 4, for example, Ubuntu Server 1804
+-        assert_that(result.exit_code).described_as("failed to get pool").is_in(0, 4)
++        # if kvp_client returns 5, it means no records available in mariner 2 arm64
++        assert_that(result.exit_code).described_as("failed to get pool").is_in(0, 4, 5)
+         matched_lines = find_patterns_in_lines(result.stdout, [self._key_value_pattern])
+         records = {item[0]: item[1] for item in matched_lines[0]}
+ 

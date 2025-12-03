@@ -1,0 +1,12 @@
+diff --git a/microsoft/testsuites/vm_extensions/azure_disk_encryption.py b/microsoft/testsuites/vm_extensions/azure_disk_encryption.py
+index abce1a1..9228484 100644
+--- a/microsoft/testsuites/vm_extensions/azure_disk_encryption.py
++++ b/microsoft/testsuites/vm_extensions/azure_disk_encryption.py
+@@ -138,6 +138,7 @@ class AzureDiskEncryption(TestSuite):
+         """,
+         priority=1,
+         requirement=simple_requirement(
++            min_memory_mb=MIN_REQUIRED_MEMORY_MB,
+             supported_features=[CvmDisabled()],
+         ),
+     )
