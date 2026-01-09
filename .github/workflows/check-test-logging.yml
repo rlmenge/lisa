@@ -1,0 +1,73 @@
+name: Check Test Logging Standards
+
+on:
+  pull_request:
+    paths:
+      - 'lisa/microsoft/testsuites/**/*.py'
+      - 'lisa/examples/testsuites/**/*.py'
+      - 'selftests/**/*.py'
+
+jobs:
+  check-log-warnings:
+    runs-on: ubuntu-latest
+    name: Verify tests don't use warning-level logging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Get changed test files
+        id: changed-files
+        run: |
+          # Get the list of changed Python files in test directories
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only --diff-filter=AM origin/${{ github.base_ref }}...HEAD | \
+            grep -E '^(lisa/microsoft/testsuites|lisa/examples/testsuites|selftests)/.*\.py$' || true)
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No test files changed"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changed test files:"
+            echo "$CHANGED_FILES"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            # Save to file for next step
+            echo "$CHANGED_FILES" > changed_files.txt
+          fi
+
+      - name: Check for log.warning usage
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          # Use the Python AST-based checker for accurate detection
+          python3 .github/scripts/check_test_logging.py $(cat changed_files.txt)
+
+      - name: Check for alternative patterns
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          # Provide helpful feedback if we find log.info patterns
+          # (this is informational only, doesn't fail the build)
+          echo "ℹ️  Checking for proper logging patterns..."
+          
+          INFO_COUNT=0
+          DEBUG_COUNT=0
+          
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              INFO_MATCHES=$(grep -c -E '^\s*log\.info\(' "$file" || echo "0")
+              DEBUG_MATCHES=$(grep -c -E '^\s*log\.debug\(' "$file" || echo "0")
+              INFO_COUNT=$((INFO_COUNT + INFO_MATCHES))
+              DEBUG_COUNT=$((DEBUG_COUNT + DEBUG_MATCHES))
+            fi
+          done < changed_files.txt
+          
+          echo "✅ Found $INFO_COUNT log.info() calls"
+          echo "✅ Found $DEBUG_COUNT log.debug() calls"
+          echo ""
+          echo "These are the recommended logging levels for tests."
