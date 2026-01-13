@@ -3,9 +3,6 @@ name: Check Test Logging Standards
 on:
   pull_request:
     paths:
-      - 'lisa/microsoft/testsuites/**/*.py'
-      - 'lisa/examples/testsuites/**/*.py'
-      - 'selftests/**/*.py'
 
 jobs:
   check-log-warnings:

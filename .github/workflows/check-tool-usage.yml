@@ -2,10 +2,6 @@ name: Check Tool Usage Standards
 
 on:
   pull_request:
-    paths:
-      - 'lisa/microsoft/testsuites/**/*.py'
-      - 'lisa/examples/testsuites/**/*.py'
-      - 'selftests/**/*.py'
 
 jobs:
   check-tool-usage:
