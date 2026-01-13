@@ -452,7 +452,7 @@ class Ip(Tool):
             if f"dev {device}" in route or str(subnet) in route:
                 delete_routes.append(route)
         if len(delete_routes) == 0:
-            self._log.warn(
+            self._log.warning(
                 f"Ip tool found no routes for {device}"
                 " during remove_all_routes_for_device!"
             )
