@@ -1,0 +1,62 @@
+name: Check Tool Usage Standards
+
+on:
+  pull_request:
+
+jobs:
+  check-tool-usage:
+    runs-on: ubuntu-latest
+    name: Verify tests use tool wrappers instead of raw execute
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Get changed test files
+        id: changed-files
+        run: |
+          # Get the list of changed Python files in test directories
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only --diff-filter=AM origin/${{ github.base_ref }}...HEAD | \
+            grep -E '^(lisa/microsoft/testsuites|lisa/examples/testsuites|selftests)/.*\.py$' || true)
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No test files changed"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changed test files:"
+            echo "$CHANGED_FILES"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            # Save to file for next step
+            echo "$CHANGED_FILES" > changed_files.txt
+          fi
+
+      - name: Check for inappropriate node.execute() usage
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          # Use the Python AST-based checker for accurate detection
+          python3 .github/scripts/check_tool_usage.py $(cat changed_files.txt)
+
+      - name: Provide guidance on tool discovery
+        if: failure() && steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          echo ""
+          echo "📚 How to find the right tool:"
+          echo "  1. Check lisa/tools/ directory for available tools"
+          echo "  2. Look at lisa/tools/__init__.py for exported tools"
+          echo "  3. Search for similar usage in existing tests"
+          echo "  4. If no tool exists, consider creating one!"
+          echo ""
+          echo "💡 Tool benefits:"
+          echo "  • Automatic installation checks"
+          echo "  • Consistent error handling"
+          echo "  • Result caching when appropriate"
+          echo "  • Type-safe interfaces"
+          echo "  • Better testability"
