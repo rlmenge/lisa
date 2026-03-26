@@ -2141,21 +2141,10 @@ class CBLMariner(RPMDistro):
                 f"not needed for version {self.information.version}"
             )
             return
-        logind_conf = "/etc/systemd/logind.conf"
-        result = self._node.execute(
-            f"test -f {logind_conf}",
-            sudo=True,
-            no_error_log=True,
-        )
-        if result.exit_code != 0:
-            self._log.debug(
-                f"{logind_conf} not found, skipping KillUserProcesses setting"
-            )
-            return
         sed = self._node.tools[Sed]
         sed.append(
             text="KillUserProcesses=no",
-            file=logind_conf,
+            file="/etc/systemd/logind.conf",
             sudo=True,
         )
         self._node.tools[Service].restart_service("systemd-logind")
