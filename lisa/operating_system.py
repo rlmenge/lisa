@@ -2133,12 +2133,29 @@ class CBLMariner(RPMDistro):
         self._node.tools[CreateRepo].create_repo_from_tarball(tarball_path)
 
     # Disable KillUserProcesses to avoid test processes being terminated when
-    # the SSH session is reset
+    # the SSH session is reset. Only needed for Azure Linux 3.
     def set_kill_user_processes(self) -> None:
+        if self.information.version.major != 3:
+            self._log.debug(
+                "Skipping KillUserProcesses setting, "
+                f"not needed for version {self.information.version}"
+            )
+            return
+        logind_conf = "/etc/systemd/logind.conf"
+        result = self._node.execute(
+            f"test -f {logind_conf}",
+            sudo=True,
+            no_error_log=True,
+        )
+        if result.exit_code != 0:
+            self._log.debug(
+                f"{logind_conf} not found, skipping KillUserProcesses setting"
+            )
+            return
         sed = self._node.tools[Sed]
         sed.append(
             text="KillUserProcesses=no",
-            file="/etc/systemd/logind.conf",
+            file=logind_conf,
             sudo=True,
         )
         self._node.tools[Service].restart_service("systemd-logind")
